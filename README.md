@@ -1,61 +1,57 @@
-# Real-Time Chat Application
+# 💬 Real-Time Chat Application
 
-A full-stack Real-Time Chat Application built with **React.js**, **Node.js**, **Express.js**, **Socket.io**, and **MongoDB**.
-
-The application enables users to exchange messages instantly, view chat history after refreshing, and communicate through a clean and responsive web interface.
+A full-stack real-time chat application built using **React.js**, **Node.js**, **Express.js**, **Socket.io**, and **MongoDB**. The application enables users to communicate instantly, view previous messages, display timestamps, and see typing indicators and online user status.
 
 ---
 
-## Features
-
-- Real-time messaging using Socket.io
-- Send and receive messages instantly
-- Chat history persistence using MongoDB
-- Display message timestamps
-- Responsive user interface
-- Dummy username-based login
-- Automatic scroll to the latest message
-- REST APIs for fetching and storing messages
-- Clean project architecture
-
----
-
-# Tech Stack
+# 🚀 Tech Stack
 
 ## Frontend
 
-- React.js (Vite)
-- Axios
-- Socket.io Client
-- CSS
+* React.js (Vite)
+* Axios
+* Socket.io Client
+* CSS / Tailwind CSS
 
 ## Backend
 
-- Node.js
-- Express.js
-- Socket.io
-- MongoDB
-- Mongoose
+* Node.js
+* Express.js
+* Socket.io
+* MongoDB
+* Mongoose
+* dotenv
+* cors
 
 ---
 
-# Project Structure
+# 📁 Project Structure
 
 ```
-chat-app/
-
+ChatApp
 │
-├── client/
-│   ├── src/
-│   ├── public/
+├── client
+│   ├── src
+│   │   ├── components
+│   │   │   ├── Header.jsx
+│   │   │   ├── ChatBox.jsx
+│   │   │   ├── Message.jsx
+│   │   │   └── InputBox.jsx
+│   │   ├── App.jsx
+│   │   └── main.jsx
 │   └── package.json
 │
-├── server/
-│   ├── config/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── socket/
+├── server
+│   ├── config
+│   │   └── db.js
+│   ├── controllers
+│   │   └── messageController.js
+│   ├── models
+│   │   └── Message.js
+│   ├── routes
+│   │   └── messageRoutes.js
+│   ├── sockets
+│   │   └── socketHandler.js
 │   ├── server.js
 │   └── package.json
 │
@@ -64,111 +60,238 @@ chat-app/
 
 ---
 
-# Project Setup Instructions
+# ✨ Features
 
-Clone the repository
+* Real-time messaging using Socket.io
+* Send and receive messages instantly
+* Persistent chat history using MongoDB
+* Display message timestamps
+* Typing indicator
+* Online user count
+* Responsive user interface
+* Automatic scrolling to the latest message
+* REST APIs for fetching and storing messages
+* Clean project architecture
+* Error handling for API and Socket events
 
-```bash
-git clone <your-github-repository-url>
+---
+
+# 🔄 Application Flow
+
+## Step 1 - User Opens the Application
+
+The React application loads and displays a login screen.
+
 ```
-
-Move into the project directory
-
-```bash
-cd chat-app
+User
+   │
+   ▼
+Enter Username
 ```
 
 ---
 
-# Backend Setup
+## Step 2 - Join Chat
 
-Navigate to the backend
+The user enters a username and clicks **Join Chat**.
 
-```bash
-cd server
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Create a `.env` file
-
-```env
-PORT=5000
-
-MONGO_URI=your_mongodb_connection_string
-```
-
-Start the backend
-
-```bash
-npm run dev
-```
-
-Backend runs on
+The frontend emits a Socket.io event.
 
 ```
-http://localhost:5000
+socket.emit("join", username)
+```
+
+The backend:
+
+* Stores the connected user
+* Updates the online users list
+* Broadcasts the latest online users to all connected clients
+
+```
+Client
+   │
+   ▼
+Socket.io
+   │
+   ▼
+Server
+   │
+   ▼
+Online Users Updated
 ```
 
 ---
 
-# Frontend Setup
+## Step 3 - Load Previous Messages
 
-Open another terminal
+After joining,
 
-Navigate to frontend
-
-```bash
-cd client
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Start React
-
-```bash
-npm run dev
-```
-
-Frontend runs on
-
-```
-http://localhost:5173
-```
-
----
-
-# Environment Variables
-
-Backend
-
-```env
-PORT=5000
-
-MONGO_URI=your_mongodb_connection_string
-```
-
-No environment variables are required for the frontend in this project.
-
----
-
-# API Endpoints
-
-## Get Chat History
+React calls
 
 ```
 GET /api/messages
 ```
 
-Returns all stored chat messages.
+The backend:
+
+* Fetches messages from MongoDB
+* Returns them to the frontend
+
+```
+MongoDB
+   │
+   ▼
+Express API
+   │
+   ▼
+React Chat Screen
+```
+
+---
+
+## Step 4 - Send Message
+
+When the user types a message and clicks **Send**,
+
+React emits
+
+```
+socket.emit("sendMessage")
+```
+
+with
+
+```
+{
+    username,
+    message
+}
+```
+
+---
+
+## Step 5 - Backend Processing
+
+The backend receives the message.
+
+It
+
+* validates the data
+* saves the message in MongoDB
+* broadcasts the saved message to every connected user
+
+```
+Client
+   │
+   ▼
+Socket.io
+   │
+   ▼
+Express Server
+   │
+   ▼
+MongoDB
+   │
+   ▼
+Socket Broadcast
+```
+
+---
+
+## Step 6 - Receive Message
+
+Every connected client listens for
+
+```
+receiveMessage
+```
+
+When a new message arrives,
+
+React updates the chat immediately without refreshing.
+
+```
+socket.on("receiveMessage")
+```
+
+---
+
+## Step 7 - Typing Indicator
+
+While typing,
+
+the frontend sends
+
+```
+socket.emit("typing")
+```
+
+The server broadcasts
+
+```
+typing
+```
+
+Other users see
+
+```
+Sowmiya is typing...
+```
+
+After one second of inactivity,
+
+```
+stopTyping
+```
+
+is emitted.
+
+---
+
+## Step 8 - Online User Status
+
+When users connect
+
+```
+join
+```
+
+When users disconnect
+
+```
+disconnect
+```
+
+The server updates
+
+```
+onlineUsers
+```
+
+and broadcasts the latest online user count.
+
+---
+
+# 🌐 REST API
+
+## Fetch Messages
+
+```
+GET /api/messages
+```
+
+### Response
+
+```
+[
+  {
+    "_id": "...",
+    "username": "Sowmiya",
+    "message": "Hello",
+    "createdAt": "..."
+  }
+]
+```
 
 ---
 
@@ -178,122 +301,178 @@ Returns all stored chat messages.
 POST /api/messages
 ```
 
-Request Body
+Request
 
-```json
+```
 {
-  "username": "John",
-  "message": "Hello"
+    "username":"Sowmiya",
+    "message":"Hello"
 }
 ```
 
 ---
 
-# Socket Events
+# 🔌 Socket Events
 
-Client emits
+## Client → Server
 
 ```
+join
 sendMessage
+typing
+stopTyping
+disconnect
 ```
 
-Server broadcasts
+---
+
+## Server → Client
 
 ```
 receiveMessage
+typing
+stopTyping
+onlineUsers
 ```
 
 ---
 
-# Design Decisions
+# 🗄 Database Schema
 
-- React.js was chosen for the frontend because it provides a fast and component-based architecture.
-- Express.js was used for creating REST APIs.
-- Socket.io was selected to provide real-time bidirectional communication.
-- MongoDB stores chat history so messages remain available after refreshing the page.
-- The application follows a modular folder structure with separate controllers, routes, models, and socket logic.
-- Components are separated into Header, ChatBox, Message, and InputBox to improve maintainability and reusability.
+```
+Message
 
----
+_id
 
-# Assumptions Made
+username
 
-- Only one global chat room is available.
-- Authentication is simulated using a username entered before joining the chat.
-- Messages are broadcast to all connected users.
-- Internet connectivity is assumed while chatting.
-- The backend server and MongoDB database are running before starting the frontend.
+message
+
+createdAt
+
+updatedAt
+```
 
 ---
 
-# Bonus Features Implemented
+# ⚙ Environment Variables
 
-- Username-based login (Dummy Authentication)
-- MongoDB message storage
-- Automatic message timestamps
-- Responsive UI
-- Automatic scroll to the latest message
+Create a `.env` file inside the server folder.
 
----
+```
+PORT=5000
 
-# Bonus Features Not Implemented
-
-- Typing Indicator
-- Online/Offline User Status
-- Message Read Status
-- Message Delivered Status
-
-These features can be added in future updates using additional Socket.io events.
+MONGO_URI=your_mongodb_connection_string
+```
 
 ---
 
-# Future Improvements
+# ▶ Running the Backend
 
-- Private chat rooms
-- JWT Authentication
-- User registration and login
-- Typing indicator
-- Online users list
-- Read receipts
-- Image sharing
-- File uploads
-- Emoji support
-- Notifications
+```
+cd server
+
+npm install
+
+npm run dev
+```
+
+Backend runs at
+
+```
+http://localhost:5000
+```
 
 ---
 
-# Deployment
+# ▶ Running the Frontend
+
+```
+cd client
+
+npm install
+
+npm run dev
+```
+
+Frontend runs at
+
+```
+http://localhost:5173
+```
+
+---
+
+# 📦 Dependencies
 
 Frontend
 
-```
-Localhost
-```
+* React
+* Axios
+* Socket.io Client
 
 Backend
 
-```
-Localhost
-```
-
-If deployed, update this section with your Render or Railway URL.
-
-Example
-
-```
-https://chat-app-api.onrender.com
-```
+* Express
+* Socket.io
+* Mongoose
+* dotenv
+* cors
+* nodemon
 
 ---
 
-# Author
+# 🏗 Design Decisions
+
+* React functional components with Hooks
+* Component-based architecture
+* Separate REST API and Socket.io layers
+* MongoDB for persistent message storage
+* Real-time communication using Socket.io
+* Modular backend structure for maintainability
+
+---
+
+# 📌 Assumptions
+
+* Username is entered manually (dummy login)
+* No authentication or password is required
+* All users share a common chat room
+* Internet connection is available
+* MongoDB database is running and accessible
+
+---
+
+# 🌟 Bonus Features Implemented
+
+* Dummy username login
+* Typing indicator
+* Online user status
+* MongoDB message persistence
+
+---
+
+# 🚀 Future Improvements
+
+* Private one-to-one chat
+* Group chat
+* Message read status
+* Delivered status
+* Image sharing
+* Emoji support
+* Authentication with JWT
+* User profile pictures
+* Notifications
+* File sharing
+
+---
+
+# 👩‍💻 Author
 
 **Sowmiya N**
 
 Software Engineer
 
-GitHub:
+Email: [your-email@example.com](mailto:your-email@example.com)
 
-```
-https://github.com/your-github-username
-```
+GitHub: https://github.com/Sowmiya1921051
