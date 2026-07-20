@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Send } from "lucide-react";
 
 const InputBox = ({ username, socket }) => {
   const [message, setMessage] = useState("");
@@ -35,18 +36,25 @@ const InputBox = ({ username, socket }) => {
   };
 
   return (
-    <div className="input-container">
+    <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-md border border-gray-200">
+
       <input
         type="text"
         placeholder="Type your message..."
         value={message}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        className="flex-1 rounded-xl border border-gray-300 px-5 py-3 text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 transition"
       />
 
-      <button onClick={sendMessage}>
+      <button
+        onClick={sendMessage}
+        className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-md transition hover:bg-indigo-700 active:scale-95"
+      >
+        <Send size={18} />
         Send
       </button>
+
     </div>
   );
 };
