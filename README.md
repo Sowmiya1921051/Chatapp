@@ -472,7 +472,4 @@ Backend
 **Sowmiya N**
 
 Software Engineer
-
-Email: [your-email@example.com](mailto:your-email@example.com)
-
 GitHub: https://github.com/Sowmiya1921051
