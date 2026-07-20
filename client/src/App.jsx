@@ -12,18 +12,24 @@ import "./App.css";
 const API_URL = "http://localhost:5000/api/messages";
 const SOCKET_URL = "http://localhost:5000";
 
-// Create Socket Connection
+// Socket Connection
 const socket = io(SOCKET_URL);
 
 function App() {
-  // Username State
+  // Username
   const [username, setUsername] = useState("");
 
-  // Join Chat State
+  // Join Status
   const [isJoined, setIsJoined] = useState(false);
 
-  // Messages State
+  // Messages
   const [messages, setMessages] = useState([]);
+
+  // Typing Indicator
+  const [typingUser, setTypingUser] = useState("");
+
+  // Online Users
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   // Fetch Chat History
   useEffect(() => {
@@ -32,27 +38,48 @@ function App() {
         const res = await axios.get(API_URL);
         setMessages(res.data);
       } catch (error) {
-        console.log("Error Fetching Messages:", error);
+        console.error("Error fetching messages:", error);
       }
     };
 
     fetchMessages();
   }, []);
 
-  // Listen for Socket Messages
+  // Socket Listeners
   useEffect(() => {
+    // Receive Messages
     socket.on("receiveMessage", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
+    // Typing
+    socket.on("typing", (username) => {
+      setTypingUser(`${username} is typing...`);
+    });
+
+    // Stop Typing
+    socket.on("stopTyping", () => {
+      setTypingUser("");
+    });
+
+    // Online Users
+    socket.on("onlineUsers", (users) => {
+      setOnlineUsers(users);
+    });
+
     return () => {
       socket.off("receiveMessage");
+      socket.off("typing");
+      socket.off("stopTyping");
+      socket.off("onlineUsers");
     };
   }, []);
 
   // Join Chat
   const handleJoin = () => {
     if (!username.trim()) return;
+
+    socket.emit("join", username);
 
     setIsJoined(true);
   };
@@ -82,19 +109,28 @@ function App() {
   // Chat Screen
   return (
     <div className="app">
-
-      <Header username={username} />
+      <Header
+        username={username}
+        onlineUsers={onlineUsers}
+      />
 
       <ChatBox
         messages={messages}
         currentUser={username}
       />
 
+      {typingUser && (
+        <div className="typing-indicator">
+          {typingUser}
+        </div>
+      )}
+
       <InputBox
         username={username}
         socket={socket}
       />
 
+      
     </div>
   );
 }

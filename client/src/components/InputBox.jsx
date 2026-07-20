@@ -3,7 +3,6 @@ import React, { useState } from "react";
 const InputBox = ({ username, socket }) => {
   const [message, setMessage] = useState("");
 
-  // Send Message
   const sendMessage = () => {
     if (!message.trim()) return;
 
@@ -12,10 +11,23 @@ const InputBox = ({ username, socket }) => {
       message,
     });
 
+    socket.emit("stopTyping");
+
     setMessage("");
   };
 
-  // Send on Enter Key
+  const handleChange = (e) => {
+    setMessage(e.target.value);
+
+    socket.emit("typing", username);
+
+    clearTimeout(window.typingTimeout);
+
+    window.typingTimeout = setTimeout(() => {
+      socket.emit("stopTyping");
+    }, 1000);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       sendMessage();
@@ -28,7 +40,7 @@ const InputBox = ({ username, socket }) => {
         type="text"
         placeholder="Type your message..."
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
 

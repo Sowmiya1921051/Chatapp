@@ -1,20 +1,15 @@
 import React from "react";
 
-const Header = ({ username }) => {
+const Header = ({ username, onlineUsers }) => {
   return (
     <header className="chat-header">
-      <div className="header-left">
+      <div>
         <h2>💬 Real-Time Chat App</h2>
       </div>
 
-      <div className="header-right">
-        <div className="user-info">
-          <span className="status"></span>
-
-          <span className="username">
-            {username}
-          </span>
-        </div>
+      <div>
+        <p>Welcome, {username}</p>
+        <p>🟢 Online Users: {onlineUsers.length}</p>
       </div>
     </header>
   );
